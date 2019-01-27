@@ -1,0 +1,40 @@
+{
+    "workouts": [
+        {
+            "name": "inclined push up",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=4dF1DOWzf20&feature=youtu.be&t=4m05s"
+        },
+        {
+            "name": "push up",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=IODxDxX7oi4"
+        },
+        {
+            "name": "diamond push up",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=_4EGPVJuqfA"
+        }
+    ],
+    "progressions": [
+        {
+            "name": "push up",
+            "target": "arms",
+            "workouts": [
+                {
+                    "name": "inclined push up",
+                    "max": 25
+                },
+                {
+                    "name": "push up",
+                    "min": 10,
+                    "max": 25
+                },
+                {
+                    "name": "diamond push up",
+                    "min": 12
+                }
+            ]
+        }
+    ]
+}
