@@ -14,12 +14,57 @@
             "name": "diamond push up",
             "unit": "reps",
             "howto": "https://www.youtube.com/watch?v=_4EGPVJuqfA"
+        },
+        {
+            "name": "pull up negative",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=gbPURTSxQLY"
+        },
+        {
+            "name": "pull up",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=eGo4IYlbE5g"
+        },
+        {
+            "name": "l-sit pull up",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=eGo4IYlbE5g"
+        },
+        {
+            "name": "squat",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=aAk5fkpA9q8"
+        },
+        {
+            "name": "chair pistol squat",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=t7Oj8-8Htyw&t=25s"
+        },
+        {
+            "name": "assisted pistol squat",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=1-Yuq9pD7JY&t=31s"
+        },
+        {
+            "name": "pistol squat",
+            "unit": "reps",
+            "howto": "https://www.youtube.com/watch?v=DjxQrgLsty4&t=45s"
+        },
+        {
+            "name": "plank",
+            "unit": "seconds",
+            "howto": ""
+        },
+        {
+            "name": "single-leg plank",
+            "unit": "seconds",
+            "howto": "https://www.youtube.com/watch?v=37jgpiK3xRw"
         }
     ],
     "progressions": [
         {
             "name": "push up",
-            "target": "arms",
+            "target": ["chest", "arms"],
             "workouts": [
                 {
                     "name": "inclined push up",
@@ -32,7 +77,73 @@
                 },
                 {
                     "name": "diamond push up",
-                    "min": 12
+                    "min": 12,
+                    "max": 50
+                }
+            ]
+        },
+        {
+            "name": "pull up",
+            "target": ["back", "arms"],
+            "workouts": [
+                {
+                    "name": "pull up negative",
+                    "max": 9
+                },
+                {
+                    "name": "pull up",
+                    "min": 3,
+                    "max": 10
+                },
+                {
+                    "name": "l-sit pull up",
+                    "min": 4,
+                    "max": 20
+                }
+            ]
+        },
+        {
+            "name": "squat",
+            "target": ["legs"],
+            "workouts": [
+                {
+                    "name": "squat",
+                    "max": 50
+                }
+            ]
+        },
+        {
+            "name": "pistol squat",
+            "target": ["legs"],
+            "workouts": [
+                {
+                    "name": "chair pistol squat",
+                    "max": 7
+                },
+                {
+                    "name": "assisted pistol squat",
+                    "min": 4,
+                    "max": 8
+                },
+                {
+                    "name": "pistol squat",
+                    "min": 4,
+                    "max": 25
+                }
+            ]
+        },
+        {
+            "name": "plank",
+            "target": ["core"],
+            "workouts": [
+                {
+                    "name": "plank",
+                    "max": 60
+                },
+                {
+                    "name": "single-leg plank",
+                    "min": 20,
+                    "max": 100
                 }
             ]
         }
