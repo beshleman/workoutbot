@@ -1,63 +1,32 @@
 from flask import Flask, request, jsonify, g
 from slackclient import SlackClient
 from slackeventsapi import SlackEventAdapter
-from progression import Workout, Progression, User
 from collections import defaultdict
+
+from .progression import *
+from .utils import *
+
 import sqlite3
 import json
 import os
+import time
+import threading
 
-DBNAME = "workout.db"
+TIME_BEFORE_CHALLENGE=1*60
 
 sc = SlackClient(os.environ["SLACK_TOKEN"])
 slash_app = Flask(__name__)
 slack_signing_secret = os.environ["SLACK_SIGNING_SECRET"]
 slack_events_adapter = SlackEventAdapter(slack_signing_secret, "/slack/events")
+channel_id = os.environ["SLACK_WORKOUT_CHAN_ID"]
+users = None
 
-def setup_db(name):
-    conn = sqlite3.connect(name)
-    c = conn.cursor()
-    c.executescript("""
-    CREATE TABLE IF NOT EXISTS user(
-       name TEXT NOT NULL PRIMARY KEY,
-       interval INTEGER NOT NULL,
-       focus TEXT,
-       exclude TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS user_progress(
-       user_name TEXT NOT NULL,
-       progression TEXT NOT NULL,
-       workout TEXT NOT NULL,
-       count REAL,
-       FOREIGN KEY (user_name) REFERENCES user(name),
-       PRIMARY KEY (user_name, progression)
-    );
-    """)
-    conn.commit()
-    return conn
-
-def load_exercises(path):
-    with open(path, "r") as f:
-        js = json.load(f)
-        workouts = {}
-        progressions = {}
-        for workout in js["workouts"]:
-            workouts[workout["name"]] = Workout(
-                workout["name"],
-                workout["unit"],
-                workout["howto"],
-                workout.get("extra", "")
-            )
-
-        for progression in js["progressions"]:
-            p = Progression(progression["name"], set(progression["target"]))
-            for workout in progression["workouts"]:
-                p.add_stage(workouts[workout["name"]],
-                            workout.get("min", 0),
-                            workout["max"])
-            progressions[p.name] = p
-        return progressions
+class UserStatus:
+    def __init__(self, user):
+        self.user = user
+        self.active = False
+        self.last_challenged = None
+        self.last_became_active = None
 
 def generate_register_attachments(progressions):
     attachments = []
@@ -147,7 +116,8 @@ def interactive():
     if payload["callback_id"] == "user_register":
         selections = user_registrations[payload["user"]["name"]]
         progs = get_progressions()
-        user = User(payload["user"]["name"], selections["interval"])
+        user = User(payload["user"]["id"], payload["user"]["name"],
+                    selections["interval"])
         for p in progs.values():
             if p.name in selections:
                 stage = p.stage(selections[p.name])
@@ -182,5 +152,71 @@ def get_progressions():
         prog = g._progressions = load_exercises("exercises.json")
     return prog
 
-if __name__ == "__main__":
+def update_active_users():
+    global users
+    resp = sc.api_call("conversations.members", channel=channel_id)
+    for member in resp["members"]:
+        info = sc.api_call("users.getPresence", user=member)
+        if member not in users:
+            continue
+        elif info["presence"] != "active":
+            users[member].active = False
+        elif info["presence"] == "active" and not users[member].active:
+            users[member].active = True
+            users[member].last_became_active = time.time()
+
+
+def send_challenge_to(user):
+    challenge = generate_challenge(user)
+    print("Challenge for {}: {}".format(user.name, challenge))
+    text = "{} {} {} @{}!".format(challenge.count, challenge.workout.unit,
+                                  challenge.workout.name, challenge.user.name)
+    attachments = [
+        {
+            "text": text,
+            "footer": "Part of the '{}' progression: <{}|How Video>".format(
+                challenge.progression.name, challenge.workout.howto)
+        }
+    ]
+    res = sc.api_call("chat.postMessage", channel=channel_id,
+                      attachments=attachments, link_names=True)
+    print(res)
+
+def challenge_thread():
+    global users
+    while True:
+        update_active_users()
+        for user in users.values():
+            if not user.active:
+                continue
+            now = time.time()
+            time_from_active = now - user.last_became_active
+            if time_from_active < TIME_BEFORE_CHALLENGE:
+                continue
+
+            if user.last_challenged is not None:
+                time_from_challenge = now - user.last_challenged
+
+                if time_from_challenge/60 > user.user.interval:
+                    send_challenge_to(user.user)
+                    user.last_challenged = now
+            else:
+                send_challenge_to(user.user)
+                user.last_challenged = now
+        print("Sleeping for 120 seconds")
+        time.sleep(120)
+
+def run():
+    global users
+    conn = setup_db(DBNAME)
+    progressions = load_exercises("exercises.json")
+    users = {}
+    for (id,) in conn.execute("select id from user").fetchall():
+        users[id] = UserStatus(user=User.from_db(conn, id, progressions))
+    print("Loaded {} users".format(len(users)))
+    challenge_t = threading.Thread(target=challenge_thread)
+    challenge_t.start()
     slash_app.run(host="0.0.0.0", port=54325)
+
+if __name__ == "__main__":
+    run()

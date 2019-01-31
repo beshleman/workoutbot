@@ -44,17 +44,18 @@ def generate_challenge(user):
     stage = point.stage()
     count = math.floor(random.uniform(point.count*(1-CHALLENGE_RANDOM_RANGE),
                                       point.count*(1+CHALLENGE_RANDOM_RANGE)))
-    return Challenge(stage.workout, count, user)
+    return Challenge(point.progression, stage.workout, count, user)
 
 class Challenge:
-    def __init__(self, workout, count, user):
+    def __init__(self, progression, workout, count, user):
+        self.progression = progression
         self.workout = workout
         self.count = count
         self.user = user
 
     def __repr__(self):
-        return "Challenge(workout={}, count={}, user={})".format(
-            self.workout, self.count, self.user)
+        return "Challenge(progression={}, workout={}, count={}, user={})".format(
+            self.progression, self.workout, self.count, self.user)
 
 
 class ProgressPoint:
@@ -113,22 +114,23 @@ class ProgressPoint:
 
 class User:
     @classmethod
-    def from_db(cls, conn, name, progressions):
+    def from_db(cls, conn, id, progressions):
         c = conn.cursor()
-        name, focus, exclude = c.execute("""
-        select name, interval, focus, exclude from user where name = ?;
-        """, (name,)).fetchone()
-        user = cls(name, interval, pickle.loads(focus), pickle.loads(exclude))
+        name, interval, focus, exclude = c.execute("""
+        select name, interval, focus, exclude from user where id = ?;
+        """, (id,)).fetchone()
+        user = cls(id, name, interval, pickle.loads(focus), pickle.loads(exclude))
 
         res = c.execute("""
         select progression, workout, count from user_progress
-        where user_name = ?
-        """, (name,))
+        where user_id = ?
+        """, (id,))
         for progression, workout, count in res.fetchall():
             user.register_point(progressions[progression], workout, count)
         return user
 
-    def __init__(self, name, interval, focus=set([]), exclude=set([])):
+    def __init__(self, id, name, interval, focus=set([]), exclude=set([])):
+        self.id = id
         self.name = name
         self.focus = focus
         self.exclude = exclude
@@ -136,19 +138,19 @@ class User:
         self.progress = {}
 
     def __eq__(self, other):
-        return self.name == other.name
+        return self.id == other.id
 
     def save(self, conn):
         c = conn.cursor()
-        c.execute("delete from user where name = ?", (self.name,))
-        c.execute("delete from user_progress where user_name = ?", (self.name,))
+        c.execute("delete from user where id = ?", (self.id,))
+        c.execute("delete from user_progress where user_id = ?", (self.id,))
 
-        c.execute("insert into user values(?, ?, ?, ?)",
-                  (self.name, self.interval, pickle.dumps(self.focus),
+        c.execute("insert into user values(?, ?, ?, ?, ?)",
+                  (self.id, self.name, self.interval, pickle.dumps(self.focus),
                    pickle.dumps(self.exclude)))
         for p in self.progress.values():
             c.execute("insert into user_progress values(?, ?, ?, ?)",
-                      (self.name, p.progression.name, p.workout, p.count))
+                      (self.id, p.progression.name, p.workout, p.count))
         conn.commit()
 
     def register_point(self, progression, workout, count):
@@ -160,8 +162,8 @@ class User:
         self.progress[point.progression.name] = point
 
     def __repr__(self):
-        return "User(name='{}', interval={}, progress={})".format(
-            self.name, self.progress, self.interval)
+        return "User(id='{}', name='{}', interval={}, progress={})".format(
+            self.id, self.name, self.interval, self.progress)
 
 class Workout:
     def __init__(self, name, unit, howto, extra):

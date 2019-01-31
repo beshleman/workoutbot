@@ -1,6 +1,6 @@
 from nose.tools import *
 from workoutbot.progression import *
-from workoutbot.server import *
+from workoutbot.utils import *
 from math import floor
 import sqlite3
 
@@ -64,7 +64,7 @@ def test_challenge():
     progressions = load_exercises("exercises.json")
     test_prog = next(iter(progressions.values()))
     test_stage = test_prog.stages[-1]
-    user = User("Bob")
+    user = User("foo", "Bob", 1)
     test_point = user.register_point(test_prog, test_stage.workout.name, test_stage.min)
     challenge = generate_challenge(user)
     assert_greater_equal(challenge.count, floor(test_point.count * (1 - CHALLENGE_RANDOM_RANGE)))
@@ -74,12 +74,12 @@ def test_user():
     progressions = load_exercises("exercises.json")
     test_prog = next(iter(progressions.values()))
     test_stage = test_prog.stages[-1]
-    user = User("Bob")
+    user = User("foo", "Bob", 1)
     test_point = user.register_point(test_prog, test_stage.workout.name, test_stage.min)
     conn = setup_db(":memory:")
 
     user.save(conn)
-    other = User.from_db(conn, "Bob", progressions)
+    other = User.from_db(conn, "foo", progressions)
     assert_equal(user.name, other.name)
     assert_equal(user.focus, other.focus)
     assert_equal(user.exclude, other.exclude)
@@ -88,7 +88,7 @@ def test_user():
     user.focus = "legs"
     user.save(conn)
 
-    other = User.from_db(conn, "Bob", progressions)
+    other = User.from_db(conn, "foo", progressions)
     assert_equal(user.name, other.name)
     assert_equal(user.focus, other.focus)
     assert_equal(user.exclude, other.exclude)

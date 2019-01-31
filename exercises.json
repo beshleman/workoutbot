@@ -2,62 +2,62 @@
     "workouts": [
         {
             "name": "inclined push up",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=4dF1DOWzf20&feature=youtu.be&t=4m05s"
         },
         {
             "name": "push up",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=IODxDxX7oi4"
         },
         {
             "name": "diamond push up",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=_4EGPVJuqfA"
         },
         {
             "name": "pull up negative",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=gbPURTSxQLY"
         },
         {
             "name": "pull up",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=eGo4IYlbE5g"
         },
         {
             "name": "l-sit pull up",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=eGo4IYlbE5g"
         },
         {
             "name": "squat",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=aAk5fkpA9q8"
         },
         {
             "name": "chair pistol squat",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=t7Oj8-8Htyw&t=25s"
         },
         {
             "name": "assisted pistol squat",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=1-Yuq9pD7JY&t=31s"
         },
         {
             "name": "pistol squat",
-            "unit": "reps",
+            "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=DjxQrgLsty4&t=45s"
         },
         {
             "name": "plank",
-            "unit": "seconds",
+            "unit": "second",
             "howto": ""
         },
         {
             "name": "single-leg plank",
-            "unit": "seconds",
+            "unit": "second",
             "howto": "https://www.youtube.com/watch?v=37jgpiK3xRw"
         }
     ],

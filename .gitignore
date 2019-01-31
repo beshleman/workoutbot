@@ -1,2 +1,4 @@
 env/
 workoutbot/__pycache__/
+tests/__pycache__/
+workout.db
