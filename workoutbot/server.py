@@ -12,7 +12,7 @@ import os
 import time
 import threading
 
-TIME_BEFORE_CHALLENGE=1*60
+TIME_BEFORE_CHALLENGE=15*60
 
 sc = SlackClient(os.environ["SLACK_TOKEN"])
 slash_app = Flask(__name__)
@@ -109,11 +109,14 @@ user_registrations = defaultdict(dict)
 @slash_app.route("/interactive", methods=["POST"])
 def interactive():
     global user_registrations
+    global users
 
     payload = json.loads(request.form["payload"])
     print(payload)
 
-    if payload["callback_id"] == "user_register":
+    callback = payload["callback_id"]
+
+    if callback == "user_register":
         selections = user_registrations[payload["user"]["name"]]
         progs = get_progressions()
         user = User(payload["user"]["id"], payload["user"]["name"],
@@ -129,16 +132,91 @@ def interactive():
                 user.register_point(p, stage.workout.name, avg)
         user.save(get_db())
         del user_registrations[payload["user"]["name"]]
-        return jsonify({"text": "Registered user"})
-    elif payload["callback_id"] == "user_register_setup":
+        return jsonify({"text": "Registration complete!"})
+    elif callback == "user_register_setup":
         progression = payload["actions"][0]["name"]
         workout = payload["actions"][0]["selected_options"][0]["value"]
         user_registrations[payload["user"]["name"]][progression] = workout
         return ""
-    elif payload["callback_id"] == "user_register_interval":
+    elif callback == "user_register_interval":
         interval = payload["actions"][0]["selected_options"][0]["value"]
         user_registrations[payload["user"]["name"]]["interval"] = interval
         return ""
+    elif callback == "workout_done":
+        value = json.loads(payload["actions"][0]["value"])
+        if value["status"] == "completed":
+            text = "Congrats! How hard was it?"
+            buttons = ["Very easy", "Easy", "Moderate", "Hard", "Very hard"]
+        else:
+            text = "You'll get it next time! How close were you?"
+            buttons = ["Very close", "Close", "Moderate", "Far", "Very far"]
+        return jsonify(
+            {
+                "text": text,
+                "attachments": [{
+                    "text": "",
+                    "callback_id": "workout_rating",
+                    "attachment_type": "default",
+                    "actions": [
+                        {
+                            "name": button,
+                            "text": button,
+                            "type": "button",
+                            "value": json.dumps(value)
+                        } for button in buttons
+                    ]
+                }]
+            })
+    elif callback == "workout_rating":
+        value = json.loads(payload["actions"][0]["value"])
+        progression = value["progression"]
+        workout = value["workout"]
+        difficulty = payload["actions"][0]["name"]
+        user = users[payload["user"]["id"]]
+        point = user.user.progress[progression]
+        if value["status"] == "completed":
+            if difficulty == "Very easy":
+                difficulty = CompletedDifficulty.VERY_EASY
+            elif difficulty == "Easy":
+                difficulty = CompletedDifficulty.EASY
+            elif difficulty == "Moderate":
+                difficulty = CompletedDifficulty.MODERATE
+            elif difficulty == "Hard":
+                difficulty = CompletedDifficulty.HARD
+            elif difficulty == "Very hard":
+                difficulty = CompletedDifficulty.VERY_HARD
+            else:
+                raise RuntimeError("Unknown difficulty: {}".format(difficulty))
+            point = point.next_point(difficulty)
+            mark = "heavy_check_mark"
+        else:
+            if difficulty == "Very far":
+                difficulty = FailureDifficulty.VERY_FAR
+            elif difficulty == "Far":
+                difficulty = FailureDifficulty.FAR
+            elif difficulty == "Moderate":
+                difficulty = FailureDifficulty.MODERATE
+            elif difficulty == "Close":
+                difficulty = FailureDifficulty.CLOSE
+            elif difficulty == "Almost":
+                difficulty = FailureDifficulty.ALMOST
+            else:
+                raise RuntimeError("Unknown difficulty: {}".format(difficulty))
+            point = point.prev_point(difficulty)
+            mark = "heavy_multiplication_x"
+        user.user.update_progress(point)
+        user.user.save(get_db())
+
+        res = sc.api_call("reactions.add", name=mark,
+                          timestamp=value["ts"], channel=channel_id)
+        print(res)
+
+        return jsonify({
+            'response_type': 'ephemeral',
+            'text': '',
+            'replace_original': True,
+            'delete_original': True
+        })
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -174,13 +252,44 @@ def send_challenge_to(user):
     attachments = [
         {
             "text": text,
-            "footer": "Part of the '{}' progression: <{}|How Video>".format(
+            "footer": "Part of the '{}' progression: <{}|HowTo Video>".format(
                 challenge.progression.name, challenge.workout.howto)
         }
     ]
-    res = sc.api_call("chat.postMessage", channel=channel_id,
-                      attachments=attachments, link_names=True)
-    print(res)
+    msg_res =sc.api_call("chat.postMessage", channel=channel_id,
+                attachments=attachments, link_names=True)
+
+    sc.api_call("chat.postEphemeral", channel=channel_id, user=user.id,
+                attachments=[
+                    {
+                        "text": "Did you do it?",
+                        "callback_id": "workout_done",
+                        "attachment_type": "default",
+                        "actions": [
+                            {
+                                "name": "completed",
+                                "text": ":heavy_check_mark:",
+                                "type": "button",
+                                "value": json.dumps({
+                                    "status": "completed",
+                                    "progression": challenge.progression.name,
+                                    "workout": challenge.workout.name,
+                                    "ts": msg_res["ts"]
+                                })
+                            },
+                            {
+                                "name": "fail",
+                                "text": ":heavy_multiplication_x:",
+                                "type": "button",
+                                "value": json.dumps({
+                                    "status": "fail",
+                                    "progression": challenge.progression.name,
+                                    "workout": challenge.workout.name,
+                                    "ts": msg_res["ts"]
+                                })
+                            },
+                        ]
+                    }])
 
 def challenge_thread():
     global users
