@@ -105,118 +105,133 @@ def register():
         ]
     })
 
-user_registrations = defaultdict(dict)
+def finish_registration(payload):
+    global in_progress_registrations
+    global users
+
+    selections = in_progress_registrations[payload["user"]["name"]]
+    progs = get_progressions()
+    user = User(payload["user"]["id"], payload["user"]["name"],
+                selections["interval"])
+    for p in progs.values():
+        if p.name in selections:
+            stage = p.stage(selections[p.name])
+            avg = (stage.min + stage.max) / 2
+            user.register_point(p, selections[p.name], avg)
+        else:
+            stage = p.stages[0]
+            avg = (stage.min + stage.max) / 2
+            user.register_point(p, stage.workout.name, avg)
+    user.save(get_db())
+    del in_progress_registrations[payload["user"]["name"]]
+    users[user.id] = UserStatus(user=user)
+
+    return jsonify({"text": "Registration complete!"})
+
+def workout_done(payload):
+    value = json.loads(payload["actions"][0]["value"])
+    if value["status"] == "completed":
+        text = "Congrats! How hard was it?"
+        buttons = ["Very easy", "Easy", "Moderate", "Hard", "Very hard"]
+    else:
+        text = "You'll get it next time! How close were you?"
+        buttons = ["Very close", "Close", "Moderate", "Far", "Very far"]
+    return jsonify(
+        {
+            "text": text,
+            "attachments": [{
+                "text": "",
+                "callback_id": "workout_rating",
+                "attachment_type": "default",
+                "actions": [
+                    {
+                        "name": button,
+                        "text": button,
+                        "type": "button",
+                        "value": json.dumps(value)
+                    } for button in buttons
+                ]
+            }]
+        })
+
+def workout_rating(payload):
+    global users
+
+    value = json.loads(payload["actions"][0]["value"])
+    progression = value["progression"]
+    workout = value["workout"]
+    difficulty = payload["actions"][0]["name"]
+    user = users[payload["user"]["id"]]
+    point = user.user.progress[progression]
+    if value["status"] == "completed":
+        if difficulty == "Very easy":
+            difficulty = CompletedDifficulty.VERY_EASY
+        elif difficulty == "Easy":
+            difficulty = CompletedDifficulty.EASY
+        elif difficulty == "Moderate":
+            difficulty = CompletedDifficulty.MODERATE
+        elif difficulty == "Hard":
+            difficulty = CompletedDifficulty.HARD
+        elif difficulty == "Very hard":
+            difficulty = CompletedDifficulty.VERY_HARD
+        else:
+            raise RuntimeError("Unknown difficulty: {}".format(difficulty))
+        point = point.next_point(difficulty)
+        mark = "heavy_check_mark"
+    else:
+        if difficulty == "Very far":
+            difficulty = FailureDifficulty.VERY_FAR
+        elif difficulty == "Far":
+            difficulty = FailureDifficulty.FAR
+        elif difficulty == "Moderate":
+            difficulty = FailureDifficulty.MODERATE
+        elif difficulty == "Close":
+            difficulty = FailureDifficulty.CLOSE
+        elif difficulty == "Almost":
+            difficulty = FailureDifficulty.ALMOST
+        else:
+            raise RuntimeError("Unknown difficulty: {}".format(difficulty))
+        point = point.prev_point(difficulty)
+        mark = "heavy_multiplication_x"
+    user.user.update_progress(point)
+    user.user.save(get_db())
+
+    res = sc.api_call("reactions.add", name=mark,
+                      timestamp=value["ts"], channel=channel_id)
+    print(res)
+
+    return jsonify({
+        'response_type': 'ephemeral',
+        'text': '',
+        'replace_original': True,
+        'delete_original': True
+    })
+
+in_progress_registrations = defaultdict(dict)
 @slash_app.route("/interactive", methods=["POST"])
 def interactive():
-    global user_registrations
+    global in_progress_registrations
     global users
 
     payload = json.loads(request.form["payload"])
     print(payload)
 
     callback = payload["callback_id"]
-
     if callback == "user_register":
-        selections = user_registrations[payload["user"]["name"]]
-        progs = get_progressions()
-        user = User(payload["user"]["id"], payload["user"]["name"],
-                    selections["interval"])
-        for p in progs.values():
-            if p.name in selections:
-                stage = p.stage(selections[p.name])
-                avg = (stage.min + stage.max) / 2
-                user.register_point(p, selections[p.name], avg)
-            else:
-                stage = p.stages[0]
-                avg = (stage.min + stage.max) / 2
-                user.register_point(p, stage.workout.name, avg)
-        user.save(get_db())
-        del user_registrations[payload["user"]["name"]]
-        return jsonify({"text": "Registration complete!"})
+        return finish_registration(payload)
     elif callback == "user_register_setup":
         progression = payload["actions"][0]["name"]
         workout = payload["actions"][0]["selected_options"][0]["value"]
-        user_registrations[payload["user"]["name"]][progression] = workout
+        in_progress_registrations[payload["user"]["name"]][progression] = workout
         return ""
     elif callback == "user_register_interval":
-        interval = payload["actions"][0]["selected_options"][0]["value"]
-        user_registrations[payload["user"]["name"]]["interval"] = interval
+        interval = int(payload["actions"][0]["selected_options"][0]["value"])
+        in_progress_registrations[payload["user"]["name"]]["interval"] = interval
         return ""
     elif callback == "workout_done":
-        value = json.loads(payload["actions"][0]["value"])
-        if value["status"] == "completed":
-            text = "Congrats! How hard was it?"
-            buttons = ["Very easy", "Easy", "Moderate", "Hard", "Very hard"]
-        else:
-            text = "You'll get it next time! How close were you?"
-            buttons = ["Very close", "Close", "Moderate", "Far", "Very far"]
-        return jsonify(
-            {
-                "text": text,
-                "attachments": [{
-                    "text": "",
-                    "callback_id": "workout_rating",
-                    "attachment_type": "default",
-                    "actions": [
-                        {
-                            "name": button,
-                            "text": button,
-                            "type": "button",
-                            "value": json.dumps(value)
-                        } for button in buttons
-                    ]
-                }]
-            })
+        return workout_done(payload)
     elif callback == "workout_rating":
-        value = json.loads(payload["actions"][0]["value"])
-        progression = value["progression"]
-        workout = value["workout"]
-        difficulty = payload["actions"][0]["name"]
-        user = users[payload["user"]["id"]]
-        point = user.user.progress[progression]
-        if value["status"] == "completed":
-            if difficulty == "Very easy":
-                difficulty = CompletedDifficulty.VERY_EASY
-            elif difficulty == "Easy":
-                difficulty = CompletedDifficulty.EASY
-            elif difficulty == "Moderate":
-                difficulty = CompletedDifficulty.MODERATE
-            elif difficulty == "Hard":
-                difficulty = CompletedDifficulty.HARD
-            elif difficulty == "Very hard":
-                difficulty = CompletedDifficulty.VERY_HARD
-            else:
-                raise RuntimeError("Unknown difficulty: {}".format(difficulty))
-            point = point.next_point(difficulty)
-            mark = "heavy_check_mark"
-        else:
-            if difficulty == "Very far":
-                difficulty = FailureDifficulty.VERY_FAR
-            elif difficulty == "Far":
-                difficulty = FailureDifficulty.FAR
-            elif difficulty == "Moderate":
-                difficulty = FailureDifficulty.MODERATE
-            elif difficulty == "Close":
-                difficulty = FailureDifficulty.CLOSE
-            elif difficulty == "Almost":
-                difficulty = FailureDifficulty.ALMOST
-            else:
-                raise RuntimeError("Unknown difficulty: {}".format(difficulty))
-            point = point.prev_point(difficulty)
-            mark = "heavy_multiplication_x"
-        user.user.update_progress(point)
-        user.user.save(get_db())
-
-        res = sc.api_call("reactions.add", name=mark,
-                          timestamp=value["ts"], channel=channel_id)
-        print(res)
-
-        return jsonify({
-            'response_type': 'ephemeral',
-            'text': '',
-            'replace_original': True,
-            'delete_original': True
-        })
+        return workout_rating(payload)
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -234,10 +249,10 @@ def update_active_users():
     global users
     resp = sc.api_call("conversations.members", channel=channel_id)
     for member in resp["members"]:
-        info = sc.api_call("users.getPresence", user=member)
         if member not in users:
             continue
-        elif info["presence"] != "active":
+        info = sc.api_call("users.getPresence", user=member)
+        if info["presence"] != "active":
             users[member].active = False
         elif info["presence"] == "active" and not users[member].active:
             users[member].active = True
