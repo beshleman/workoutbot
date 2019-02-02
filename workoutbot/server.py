@@ -54,6 +54,13 @@ def generate_register_attachments(progressions):
             })
     return attachments
 
+def is_working_hours():
+    t = time.localtime()
+    if t.tm_wday not in [5, 6] and (
+         t.tm_hour >= 8 and t.tm_hour < 17):
+        return True
+    return False
+
 @slash_app.route("/register", methods=["POST"])
 def register():
     progressions = get_progressions()
@@ -309,6 +316,11 @@ def send_challenge_to(user):
 def challenge_thread():
     global users
     while True:
+        if not is_working_hours():
+            # Sleep for half an hour
+            time.sleep(1800)
+            continue
+
         update_active_users()
         for user in users.values():
             if not user.active:
