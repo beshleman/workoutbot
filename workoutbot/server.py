@@ -21,6 +21,10 @@ slack_events_adapter = SlackEventAdapter(slack_signing_secret, "/slack/events")
 channel_id = os.environ["SLACK_WORKOUT_CHAN_ID"]
 users = None
 
+# Fixup the timezone
+os.environ["TZ"]="US/Central"
+time.tzset()
+
 class UserStatus:
     def __init__(self, user):
         self.user = user
