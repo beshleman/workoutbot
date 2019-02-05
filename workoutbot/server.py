@@ -65,6 +65,28 @@ def is_working_hours():
         return True
     return False
 
+@slash_app.route("/set-interval", methods=["POST"])
+def set_interval():
+    global users
+    interval = request.form["text"]
+    if len(interval) == 0:
+        return jsonify({
+            "response_type": "ephemeral",
+            "text": "Error: Missing interval"
+        })
+    elif request.form["user_id"] not in users:
+        return jsonify({
+            "response_type": "ephemeral",
+            "text": "Error: Please register first with `/workoutbot-register`"
+        })
+    user = users[request.form["user_id"]]
+    user.user.interval = int(interval)
+    user.user.save(get_db())
+    return jsonify({
+        "response_type": "ephemeral",
+        "text": "Interval set to every {} minutes".format(interval)
+    })
+
 @slash_app.route("/register", methods=["POST"])
 def register():
     progressions = get_progressions()
