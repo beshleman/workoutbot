@@ -306,6 +306,7 @@ def send_challenge_to(user):
     ]
     msg_res =sc.api_call("chat.postMessage", channel=channel_id,
                 attachments=attachments, link_names=True)
+    user.challenged_with(challenge)
 
     sc.api_call("chat.postEphemeral", channel=channel_id, user=user.id,
                 attachments=[

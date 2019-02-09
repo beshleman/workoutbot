@@ -13,7 +13,8 @@ def setup_db(name):
        name TEXT NOT NULL,
        interval INTEGER NOT NULL,
        focus TEXT,
-       exclude TEXT
+       exclude TEXT,
+       last_progression TEXT
     );
 
     CREATE TABLE IF NOT EXISTS user_progress(

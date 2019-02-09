@@ -32,7 +32,8 @@ class FailureDifficulty(Enum):
     ALMOST = 0.99
 
 def generate_challenge(user):
-    options = user.progress.values()
+    options = [o for o in user.progress.values()
+               if o.progression.name != user.last_progression]
     if user.focus:
         options = [p for p in options
                    if p.progression.target & user.focus]
@@ -116,10 +117,11 @@ class User:
     @classmethod
     def from_db(cls, conn, id, progressions):
         c = conn.cursor()
-        name, interval, focus, exclude = c.execute("""
-        select name, interval, focus, exclude from user where id = ?;
+        name, interval, focus, exclude, last_progression = c.execute("""
+        select name, interval, focus, exclude, last_progression from user where id = ?;
         """, (id,)).fetchone()
-        user = cls(id, name, interval, pickle.loads(focus), pickle.loads(exclude))
+        user = cls(id, name, interval, pickle.loads(focus), pickle.loads(exclude),
+                   last_progression)
 
         res = c.execute("""
         select progression, workout, count from user_progress
@@ -129,12 +131,13 @@ class User:
             user.register_point(progressions[progression], workout, count)
         return user
 
-    def __init__(self, id, name, interval, focus=set([]), exclude=set([])):
+    def __init__(self, id, name, interval, focus=set([]), exclude=set([]), last_progression=None):
         self.id = id
         self.name = name
         self.focus = focus
         self.exclude = exclude
         self.interval = interval
+        self.last_progression = last_progression
         self.progress = {}
 
     def __eq__(self, other):
@@ -145,9 +148,9 @@ class User:
         c.execute("delete from user where id = ?", (self.id,))
         c.execute("delete from user_progress where user_id = ?", (self.id,))
 
-        c.execute("insert into user values(?, ?, ?, ?, ?)",
+        c.execute("insert into user values(?, ?, ?, ?, ?, ?)",
                   (self.id, self.name, self.interval, pickle.dumps(self.focus),
-                   pickle.dumps(self.exclude)))
+                   pickle.dumps(self.exclude), self.last_progression))
         for p in self.progress.values():
             c.execute("insert into user_progress values(?, ?, ?, ?)",
                       (self.id, p.progression.name, p.workout, p.count))
@@ -157,6 +160,9 @@ class User:
         self.progress[progression.name] = ProgressPoint(
             progression, workout, count)
         return self.progress[progression.name]
+
+    def challenged_with(self, challenge):
+        self.last_progression = challenge.progression.name
 
     def update_progress(self, point):
         self.progress[point.progression.name] = point
