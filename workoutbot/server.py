@@ -310,7 +310,7 @@ def send_challenge_to(user):
     sc.api_call("chat.postEphemeral", channel=channel_id, user=user.id,
                 attachments=[
                     {
-                        "text": "Did you do it?",
+                        "text": "Could you do it?",
                         "callback_id": "workout_done",
                         "attachment_type": "default",
                         "actions": [
