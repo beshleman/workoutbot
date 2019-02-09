@@ -285,7 +285,8 @@ def update_active_users():
         if member not in users:
             continue
         info = sc.api_call("users.getPresence", user=member)
-        if info["presence"] != "active":
+        dnd = sc.api_call("dnd.info", user=member)
+        if dnd["dnd_enabled"] is True or info["presence"] != "active":
             users[member].active = False
         elif info["presence"] == "active" and not users[member].active:
             users[member].active = True
