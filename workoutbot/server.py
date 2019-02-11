@@ -283,12 +283,17 @@ def update_active_users():
     resp = sc.api_call("conversations.members", channel=channel_id)
     for member in resp["members"]:
         if member not in users:
+            print("Got unregistered user: {}".format(member))
             continue
         info = sc.api_call("users.getPresence", user=member)
         dnd = sc.api_call("dnd.info", user=member)
         if dnd["dnd_enabled"] is True or info["presence"] != "active":
+            print(dnd)
+            print("User {} is not active (dnd={}, presence={})".format(
+                 users[member].user.name, dnd["dnd_enabled"], info["presence"]))
             users[member].active = False
         elif info["presence"] == "active" and not users[member].active:
+            print("User {} becomes active".format(users[member].user.name))
             users[member].active = True
             users[member].last_became_active = time.time()
 
@@ -346,16 +351,21 @@ def challenge_thread():
     while True:
         if not is_working_hours():
             # Sleep for half an hour
+            print("Not work hours, sleeping for 1800 seconds")
             time.sleep(1800)
             continue
 
         update_active_users()
         for user in users.values():
             if not user.active:
+                print("Skipping {}: not active".format(user.user.name))
                 continue
             now = time.time()
             time_from_active = now - user.last_became_active
             if time_from_active < TIME_BEFORE_CHALLENGE:
+                print("Skipping {}: not long enough time from active ({})".format(
+                    user.user.name,
+                    time_from_active))
                 continue
 
             if user.last_challenged is not None:
@@ -364,7 +374,11 @@ def challenge_thread():
                 if time_from_challenge/60 > user.user.interval:
                     send_challenge_to(user.user)
                     user.last_challenged = now
+                else:
+                    print("Not sending challenge to {}, not long enough from last challenge ({})".format(
+                        user.user.name, time_from_challenge))
             else:
+                print("User {} not previously challenged, sending".format(user.user.name))
                 send_challenge_to(user.user)
                 user.last_challenged = now
         print("Sleeping for 120 seconds")
