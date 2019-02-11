@@ -286,11 +286,9 @@ def update_active_users():
             print("Got unregistered user: {}".format(member))
             continue
         info = sc.api_call("users.getPresence", user=member)
-        dnd = sc.api_call("dnd.info", user=member)
-        if dnd["dnd_enabled"] is True or info["presence"] != "active":
-            print(dnd)
-            print("User {} is not active (dnd={}, presence={})".format(
-                 users[member].user.name, dnd["dnd_enabled"], info["presence"]))
+        if info["presence"] != "active":
+            print("User {} is not active (presence={})".format(
+                 users[member].user.name, info["presence"]))
             users[member].active = False
         elif info["presence"] == "active" and not users[member].active:
             print("User {} becomes active".format(users[member].user.name))
