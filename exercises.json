@@ -64,6 +64,11 @@
             "name": "burpee",
             "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=G2hv_NYhM-A"
+        },
+        {
+            "name": "lunge",
+            "unit": "rep",
+            "howto": "https://www.youtube.com/watch?v=QOVaHwm-Q6U"
         }
     ],
     "progressions": [
@@ -158,6 +163,16 @@
             "workouts": [
                 {
                     "name": "burpee",
+                    "max": 35
+                }
+            ]
+        },
+        {
+            "name": "lunge",
+            "target": ["legs"],
+            "workouts": [
+                {
+                    "name": "lunge",
                     "max": 35
                 }
             ]
