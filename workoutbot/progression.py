@@ -29,7 +29,7 @@ class FailureDifficulty(Enum):
     FAR = 0.93
     MODERATE = 0.95
     CLOSE = 0.97
-    ALMOST = 0.99
+    VERY_CLOSE = 0.99
 
 def generate_challenge(user):
     options = [o for o in user.progress.values()

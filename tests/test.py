@@ -54,7 +54,7 @@ def test_prev_point():
     assert_equal(test_point.workout, prev_point.workout)
 
     test_point = ProgressPoint(test_prog, test_stage.workout.name, 100)
-    almost_point = test_point.prev_point(FailureDifficulty.ALMOST)
+    almost_point = test_point.prev_point(FailureDifficulty.VERY_CLOSE)
     far_point = test_point.prev_point(FailureDifficulty.FAR)
     assert_greater(almost_point.count, far_point.count)
     assert_less(almost_point.count, test_point.count)

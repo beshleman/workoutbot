@@ -220,8 +220,8 @@ def workout_rating(payload):
             difficulty = FailureDifficulty.MODERATE
         elif difficulty == "Close":
             difficulty = FailureDifficulty.CLOSE
-        elif difficulty == "Almost":
-            difficulty = FailureDifficulty.ALMOST
+        elif difficulty == "Very close":
+            difficulty = FailureDifficulty.VERY_CLOSE
         else:
             raise RuntimeError("Unknown difficulty: {}".format(difficulty))
         point = point.prev_point(difficulty)
