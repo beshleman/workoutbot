@@ -301,11 +301,17 @@ def send_challenge_to(user):
     print("Challenge for {}: {}".format(user.name, challenge))
     text = "{} {} {} @{}!".format(challenge.count, challenge.workout.unit,
                                   challenge.workout.name, challenge.user.name)
+    if challenge.workout.howto:
+        howto = "<{}|HowTo Video>".format(challenge.workout.howto)
+    else:
+        howto = ""
     attachments = [
         {
             "text": text,
-            "footer": "Part of the '{}' progression: <{}|HowTo Video>".format(
-                challenge.progression.name, challenge.workout.howto)
+            "footer": ": ".join(["Part of the '{}' progression".format(
+                                   challenge.progression.name),
+                                 howto,
+                                 challenge.workout.extra])
         }
     ]
     msg_res =sc.api_call("chat.postMessage", channel=channel_id,
