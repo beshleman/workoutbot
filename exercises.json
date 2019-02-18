@@ -38,17 +38,20 @@
         {
             "name": "chair pistol squat",
             "unit": "rep",
-            "howto": "https://www.youtube.com/watch?v=t7Oj8-8Htyw&t=25s"
+            "howto": "https://www.youtube.com/watch?v=t7Oj8-8Htyw&t=25s",
+            "extra": "Do this for each leg"
         },
         {
             "name": "assisted pistol squat",
             "unit": "rep",
-            "howto": "https://www.youtube.com/watch?v=1-Yuq9pD7JY&t=31s"
+            "howto": "https://www.youtube.com/watch?v=1-Yuq9pD7JY&t=31s",
+            "extra": "Do this for each leg"
         },
         {
             "name": "pistol squat",
             "unit": "rep",
-            "howto": "https://www.youtube.com/watch?v=DjxQrgLsty4&t=45s"
+            "howto": "https://www.youtube.com/watch?v=DjxQrgLsty4&t=45s",
+            "extra": "Do this for each leg"
         },
         {
             "name": "plank",
@@ -58,7 +61,8 @@
         {
             "name": "single-leg plank",
             "unit": "second",
-            "howto": "https://www.youtube.com/watch?v=37jgpiK3xRw"
+            "howto": "https://www.youtube.com/watch?v=37jgpiK3xRw",
+            "extra": "Do this for each leg"
         },
         {
             "name": "burpee",
@@ -68,10 +72,113 @@
         {
             "name": "lunge",
             "unit": "rep",
-            "howto": "https://www.youtube.com/watch?v=QOVaHwm-Q6U"
+            "howto": "https://www.youtube.com/watch?v=QOVaHwm-Q6U",
+            "extra": "Do this for each leg"
+        },
+        {
+            "name": "calf raise",
+            "unit": "rep",
+            "howto": "https://www.youtube.com/watch?v=gwLzBJYoWlI&t=30s"
+        },
+        {
+            "name": "single-leg calf raise",
+            "unit": "rep",
+            "howto": "",
+            "extra": "Do this for each leg"
+        },
+        {
+            "name": "sit-up",
+            "unit": "rep",
+            "howto": "https://www.youtube.com/watch?v=1fbU_MkV7NE"
+        },
+        {
+            "name": "downward facing dog",
+            "unit": "second",
+            "howto": "https://www.youtube.com/watch?v=SwewhLZ7_TM&index=17&list=PLHLL_rZ931zZp5oicBmfWq9LJmvJUGzEg"
+        },
+        {
+            "name": "half moon",
+            "unit": "second",
+            "howto": "https://www.youtube.com/watch?v=bY6wIoohU_M&index=11&list=PLHLL_rZ931zZp5oicBmfWq9LJmvJUGzEg"
+        },
+        {
+            "name": "standing pidgeon",
+            "unit": "second",
+            "howto": "https://www.youtube.com/watch?v=mojsHmjA4e0&app=desktop"
+        },
+        {
+            "name": "side plank",
+            "unit": "second",
+            "howto": "https://www.youtube.com/watch?v=IkMmABQ9SkM&t=5s",
+            "extra": "Do this for each side"
         }
     ],
     "progressions": [
+        {
+            "name": "downward facing dog",
+            "target": ["flexibility"],
+            "workouts": [
+                {
+                    "name": "downward facing dog",
+                    "max": 60
+                }
+            ]
+        },
+        {
+            "name": "half moon",
+            "target": ["flexibility"],
+            "workouts": [
+                {
+                    "name": "half moon",
+                    "max": 60
+                }
+            ]
+        },
+        {
+            "name": "standing pidgeon",
+            "target": ["flexibility"],
+            "workouts": [
+                {
+                    "name": "standing pidgeon",
+                    "max": 90
+                }
+            ]
+        },
+        {
+            "name": "calf raise",
+            "target": ["calves"],
+            "workouts": [
+                {
+                    "name": "calf raise",
+                    "max": 30
+                },
+                {
+                    "name": "single-leg calf raise",
+                    "min": 7,
+                    "max": 20
+                }
+            ]
+        },
+        {
+            "name": "side plank",
+            "target": ["core"],
+            "workouts": [
+                {
+                    "name": "side plank",
+                    "max": 40
+                }
+            ]
+        },
+        {
+            "name": "sit-up",
+            "target": ["core"],
+            "workouts": [
+                {
+                    "name": "sit-up",
+                    "max": 40
+                }
+            ]
+        },
         {
             "name": "push up",
             "target": ["chest", "arms"],
