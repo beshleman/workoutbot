@@ -111,9 +111,34 @@
             "unit": "second",
             "howto": "https://www.youtube.com/watch?v=IkMmABQ9SkM&t=5s",
             "extra": "Do this for each side"
+        },
+        {
+            "name": "dip negative",
+            "unit": "rep",
+            "howto": "https://www.youtube.com/watch?v=T3Scqw1BbCc"
+        },
+        {
+            "name": "dip",
+            "unit": "rep",
+            "howto": "https://www.youtube.com/watch?v=2z8JmcrW-As"
         }
     ],
     "progressions": [
+        {
+            "name": "dip",
+            "target": ["chest", "arms"],
+            "workouts": [
+                {
+                    "name": "dip negative",
+                    "max": 12
+                },
+                {
+                    "name": "dip",
+                    "min": 5,
+                    "max": 25
+                }
+            ]
+        },
         {
             "name": "downward facing dog",
             "target": ["flexibility"],
