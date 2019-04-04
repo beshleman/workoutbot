@@ -7,7 +7,7 @@ import pickle
 
 # Challenge values are selected at random from the
 # range 'user progress point +/- CHALLENGE_RANDOM_RANGE'
-CHALLENGE_RANDOM_RANGE=0.03
+CHALLENGE_RANDOM_RANGE=0.01
 
 # The scaling factor over the minimum count when a user
 # is moving up to a new stage of a progression
@@ -18,7 +18,7 @@ NEW_STAGE_FACTOR=1.10
 PREV_STAGE_FACTOR=0.90
 
 class CompletedDifficulty(Enum):
-    VERY_HARD = 1.01
+    VERY_HARD = 1.00
     HARD = 1.03
     MODERATE = 1.05
     EASY = 1.07
