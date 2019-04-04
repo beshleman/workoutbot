@@ -121,9 +121,24 @@
             "name": "dip",
             "unit": "rep",
             "howto": "https://www.youtube.com/watch?v=2z8JmcrW-As"
+        },
+        {
+            "name": "wall sit",
+            "unit": "second",
+            "howto": "https://www.youtube.com/watch?v=y-wV4Venusw&t=25s"
         }
     ],
     "progressions": [
+        {
+            "name": "wall sit",
+            "target": ["legs"],
+            "workouts": [
+                {
+                    "name": "wall sit",
+                    "max": 120
+                }
+            ]
+        },
         {
             "name": "dip",
             "target": ["chest", "arms"],
