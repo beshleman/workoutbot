@@ -285,7 +285,13 @@ def update_active_users():
         if member not in users:
             print("Got unregistered user: {}".format(member))
             continue
-        info = sc.api_call("users.getPresence", user=member)
+        # For some reason this api endpoint sometimes returns invalid JSON, so catch
+        # the exception here
+        try:
+            info = sc.api_call("users.getPresence", user=member)
+        except Exception as e:
+            print("users.getPresence api call failed (user={}): ".format(member), e)
+            return
         if "presence" not in info or info["presence"] != "active":
             print("User {} is not active (presence={})".format(
                  users[member].user.name, info["presence"]))
