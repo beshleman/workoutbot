@@ -4,7 +4,7 @@ import sqlite3
 import random
 import math
 import pickle
-from utils import ignore_workout
+from .utils import ignore_workout
 
 # Challenge values are selected at random from the
 # range 'user progress point +/- CHALLENGE_RANDOM_RANGE'
