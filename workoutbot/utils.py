@@ -1,4 +1,4 @@
-from .progression import Workout, Progression, User
+from .progression import Workout, Progression, User, Const
 import json
 import sqlite3
 
@@ -28,8 +28,6 @@ def setup_db(name):
     conn.commit()
     return conn
 
-ignore_workout = Workout('ignore', 'none', '', '')
-
 def load_exercises(path):
     with open(path, "r") as f:
         js = json.load(f)
@@ -51,7 +49,7 @@ def load_exercises(path):
 
                 # When the user choses to ignore an exercise, it remains in the 'ignore' stage
                 # Note: min/max should not used for the ignore stage
-                p.add_stage(workout=ignore_workout, min=0, max=0)
+                p.add_stage(workout=Workout(Const.IGNORE,'', '', ''), min=0, max=0)
 
             progressions[p.name] = p
         return progressions

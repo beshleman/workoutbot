@@ -4,7 +4,9 @@ import sqlite3
 import random
 import math
 import pickle
-from .utils import ignore_workout
+
+class Const:
+	IGNORE = 'IGNORE'
 
 # Challenge values are selected at random from the
 # range 'user progress point +/- CHALLENGE_RANDOM_RANGE'
@@ -37,7 +39,7 @@ def generate_challenge(user):
                if o.progression.name != user.last_progression]
 
     # Filter out any 'ignore' workouts
-    options = [o for o in options if o.stage().workout.name != ignore_workout.name]
+    options = [o for o in options if o.stage().workout.name != Const.IGNORE]
 
     if user.focus:
         options = [p for p in options
@@ -196,14 +198,13 @@ class Workout:
 
 class Stage(namedtuple('Stage', ['workout', 'min', 'max'])):
 	def __repr__(self):
-		if self.workout.name.lower() == 'ignore':
+		if self.workout.name.lower() == Const.IGNORE: 
 			return 'Ignore'
 		
 		return "{}:    {}-{} {}".format(self.workout.name.title(),
 										self.min,
 										self.max,
 										self.workout.unit)
-
 
 class Progression:
     def __init__(self, name, target):
