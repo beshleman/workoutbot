@@ -201,6 +201,9 @@ class Progression:
         self.stages.append(Progression.Stage(workout, min, max))
 
     def stage(self, workout_name):
+		if workout_name.lower() is 'ignore':
+			return None
+
         return [s for s in self.stages if s.workout.name == workout_name][0]
 
     def next_stage(self, stage):

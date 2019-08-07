@@ -55,7 +55,7 @@ def generate_register_attachments(progressions):
                         ] + [
 							{
 								"text": "Ignore",
-								"value": "ignore-" + '-'.join(p.name.lower().split())
+								"value": "ignore"
 							}
 						]
                     }
@@ -153,9 +153,13 @@ def finish_registration(payload):
                 selections["interval"])
     for p in progs.values():
         if p.name in selections:
-            stage = p.stage(selections[p.name])
-            avg = (stage.min + stage.max) / 2
-            user.register_point(p, selections[p.name], avg)
+			selection_value = selections[p.name]
+			if selection_value.lower() is not 'ignore':
+				stage = p.stage(selections[p.name])
+				avg = (stage.min + stage.max) / 2
+				user.register_point(p, selections[p.name], avg)
+			else:
+				print(p.name, 'is set to be ignored')
         else:
             stage = p.stages[0]
             avg = (stage.min + stage.max) / 2
