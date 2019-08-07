@@ -199,7 +199,7 @@ class Workout:
 class Stage(namedtuple('Stage', ['workout', 'min', 'max'])):
 	def __repr__(self):
 		if self.workout.name.lower() == Const.IGNORE: 
-			return 'Ignore'
+			return "Ignore"
 		
 		return "{}:    {}-{} {}".format(self.workout.name.title(),
 										self.min,
