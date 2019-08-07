@@ -46,5 +46,10 @@ def load_exercises(path):
                 p.add_stage(workouts[workout["name"]],
                             workout.get("min", 0),
                             workout["max"])
+
+                # When the user choses to ignore an exercise, it remains in the 'ignore' stage
+                # Note: min/max should not used for the ignore stage
+                p.add_stage(workout='ignore', min=0, max=0)
+
             progressions[p.name] = p
         return progressions

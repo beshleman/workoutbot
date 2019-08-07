@@ -52,12 +52,7 @@ def generate_register_attachments(progressions):
                                                                      s.workout.unit),
                                 "value": s.workout.name
                             } for i, s in enumerate(p.stages)
-                        ] + [
-							{
-								"text": "Ignore",
-								"value": "ignore"
-							}
-						]
+                        ]
                     }
                 ]
             })
@@ -309,6 +304,11 @@ def update_active_users():
 
 def send_challenge_to(user):
     challenge = generate_challenge(user)
+
+    if challenge.workout.lower() == 'ignore':
+        print('Ignoring {}'.format(challenge))
+        return
+
     print("Challenge for {}: {}".format(user.name, challenge))
     text = "{} {} {} @{}!".format(challenge.count, challenge.workout.unit,
                                   challenge.workout.name, challenge.user.name)
