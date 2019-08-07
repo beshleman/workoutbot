@@ -6,7 +6,7 @@ import math
 import pickle
 
 class Const:
-	IGNORE = 'IGNORE'
+	IGNORE = 'Ignore'
 
 # Challenge values are selected at random from the
 # range 'user progress point +/- CHALLENGE_RANDOM_RANGE'
@@ -198,7 +198,7 @@ class Workout:
 
 class Stage(namedtuple('Stage', ['workout', 'min', 'max'])):
 	def __repr__(self):
-		if self.workout.name.lower() == Const.IGNORE: 
+		if self.workout.name == Const.IGNORE: 
 			return "Ignore"
 		
 		return "{}:    {}-{} {}".format(self.workout.name.title(),
