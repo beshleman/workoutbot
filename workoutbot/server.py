@@ -46,10 +46,7 @@ def generate_register_attachments(progressions):
                         "type": "select",
                         "options": [
                             {
-                                "text": "{}. {}:    {}-{} {}".format(i+1, s.workout.name.title(),
-                                                                     s.min,
-                                                                     s.max,
-                                                                     s.workout.unit),
+                                "text": "{}. {}".format(i+1, s),
                                 "value": s.workout.name
                             } for i, s in enumerate(p.stages)
                         ]
@@ -304,10 +301,6 @@ def update_active_users():
 
 def send_challenge_to(user):
     challenge = generate_challenge(user)
-
-    if challenge.workout.lower() == 'ignore':
-        print('Ignoring {}'.format(challenge))
-        return
 
     print("Challenge for {}: {}".format(user.name, challenge))
     text = "{} {} {} @{}!".format(challenge.count, challenge.workout.unit,

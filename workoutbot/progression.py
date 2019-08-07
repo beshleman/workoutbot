@@ -4,6 +4,7 @@ import sqlite3
 import random
 import math
 import pickle
+from utils import ignore_workout
 
 # Challenge values are selected at random from the
 # range 'user progress point +/- CHALLENGE_RANDOM_RANGE'
@@ -34,6 +35,10 @@ class FailureDifficulty(Enum):
 def generate_challenge(user):
     options = [o for o in user.progress.values()
                if o.progression.name != user.last_progression]
+
+    # Filter out any 'ignore' workouts
+    options = [o for o in options if o.stage().workout.name != ignore_workout.name]
+
     if user.focus:
         options = [p for p in options
                    if p.progression.target & user.focus]
@@ -188,8 +193,19 @@ class Workout:
             self.unit,
             self.extra)
 
+
+class Stage(namedtuple('Stage', ['workout', 'min', 'max'])):
+	def __repr__(self):
+		if self.workout.name.lower() == 'ignore':
+			return 'Ignore'
+		
+		return "{}:    {}-{} {}".format(self.workout.name.title(),
+										self.min,
+										self.max,
+										self.workout.unit)
+
+
 class Progression:
-    Stage = namedtuple('Stage', ['workout', 'min', 'max'])
     def __init__(self, name, target):
         self.name = name
         self.target = target
@@ -199,7 +215,7 @@ class Progression:
         return self.name == other.name
 
     def add_stage(self, workout, min, max):
-        self.stages.append(Progression.Stage(workout, min, max))
+        self.stages.append(Stage(workout, min, max))
 
     def stage(self, workout_name):
         return [s for s in self.stages if s.workout.name == workout_name][0]
