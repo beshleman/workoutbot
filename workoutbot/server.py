@@ -52,7 +52,12 @@ def generate_register_attachments(progressions):
                                                                      s.workout.unit),
                                 "value": s.workout.name
                             } for i, s in enumerate(p.stages)
-                        ]
+                        ] + [
+							{
+								"text": "Ignore",
+								"value": "ignore-" + '-'.join(pname.lower().split())
+							}
+						]
                     }
                 ]
             })
