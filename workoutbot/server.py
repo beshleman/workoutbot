@@ -153,14 +153,9 @@ def finish_registration(payload):
                 selections["interval"])
     for p in progs.values():
         if p.name in selections:
-            selection_value = selections[p.name]
-            print('selection_value:', selection_value, 'p.name', p.name)
-            if selection_value.lower() != 'ignore':
-                stage = p.stage(selections[p.name])
-                avg = (stage.min + stage.max) / 2
-                user.register_point(p, selections[p.name], avg)
-            else:
-                print(p.name, 'is set to be ignored')
+            stage = p.stage(selections[p.name])
+            avg = (stage.min + stage.max) / 2
+            user.register_point(p, selections[p.name], avg)
         else:
             stage = p.stages[0]
             avg = (stage.min + stage.max) / 2
