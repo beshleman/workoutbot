@@ -55,7 +55,7 @@ def generate_register_attachments(progressions):
                         ] + [
 							{
 								"text": "Ignore",
-								"value": "ignore-" + '-'.join(pname.lower().split())
+								"value": "ignore-" + '-'.join(p.name.lower().split())
 							}
 						]
                     }
