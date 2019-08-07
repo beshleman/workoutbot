@@ -154,6 +154,7 @@ def finish_registration(payload):
     for p in progs.values():
         if p.name in selections:
             selection_value = selections[p.name]
+            print('selection_value:', selection_value, 'p.name', p.name)
             if selection_value.lower() is not 'ignore':
                 stage = p.stage(selections[p.name])
                 avg = (stage.min + stage.max) / 2
