@@ -404,7 +404,7 @@ def run():
     print("Loaded {} users".format(len(users)))
     challenge_t = threading.Thread(target=challenge_thread)
     challenge_t.start()
-    slash_app.run(host="0.0.0.0", port=54325)
+    slash_app.run(host="0.0.0.0", port=os.environ.get('PORT', 54325))
 
 if __name__ == "__main__":
     run()
