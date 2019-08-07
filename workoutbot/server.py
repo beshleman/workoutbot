@@ -155,7 +155,7 @@ def finish_registration(payload):
         if p.name in selections:
             selection_value = selections[p.name]
             print('selection_value:', selection_value, 'p.name', p.name)
-            if selection_value.lower() is not 'ignore':
+            if selection_value.lower() != 'ignore':
                 stage = p.stage(selections[p.name])
                 avg = (stage.min + stage.max) / 2
                 user.register_point(p, selections[p.name], avg)
